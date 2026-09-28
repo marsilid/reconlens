@@ -1,20 +1,20 @@
-﻿<div align="center">
+<div align="center">
 
-# рџ”Ќ ReconLens
+# 🔍 ReconLens
 
-**Passive OSINT reconnaissance of a domain's external attack surface вЂ” with a risk-scored HTML report.**
+**Passive OSINT reconnaissance of a domain's external attack surface — with a risk-scored HTML report.**
 
 [![CI](https://github.com/marsilid/reconlens/actions/workflows/ci.yml/badge.svg)](https://github.com/marsilid/reconlens/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%E2%80%933.14-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Code style](https://img.shields.io/badge/code%20style-ruff-orange)
 
-[Р СѓСЃСЃРєР°СЏ РІРµСЂСЃРёСЏ](README.ru.md)
+[Русская версия](README.ru.md)
 
 </div>
 
 ReconLens answers the question *"what does the Internet already know about this target, and what is misconfigured?"*
-It has four commands вЂ” **domain**, **username**, **phone** and **email** вЂ” that collect data from public
+It has four commands — **domain**, **username**, **phone** and **email** — that collect data from public
 sources in parallel, turn it into readable findings with concrete fixes, and (for domains) grade the result
 from **A** to **F**.
 
@@ -22,13 +22,13 @@ Everything is **passive or equivalent to a normal browser visit**: no port scann
 exploitation, and no access to private data or breach dumps.
 
 ```text
-domain    в†’ DNS, WHOIS, subdomains, e-mail security, TLS (+ Russian CA/GOST), HTTP headers,
-            technologies, network/ASN + origin-IP-behind-CDN, open ports (Shodan) вЂ” AвЂ“F score
-username  в†’ is this nickname registered on 24 public platforms (GitHub, Habr, Telegram, вЂ¦)
-phone     в†’ country, region, carrier, line type, time zones вЂ” fully offline, no network call
-email     в†’ the address's domain: deliverability, free/disposable provider, SPF/DMARC, Gravatar
-batch     в†’ scan a whole file of domains into one summary table
-diff      в†’ show what changed between two scans of the same target
+domain    → DNS, WHOIS, subdomains, e-mail security, TLS (+ Russian CA/GOST), HTTP headers,
+            technologies, network/ASN + origin-IP-behind-CDN, open ports (Shodan) — A–F score
+username  → is this nickname registered on 24 public platforms (GitHub, Habr, Telegram, …)
+phone     → country, region, carrier, line type, time zones — fully offline, no network call
+email     → the address's domain: deliverability, free/disposable provider, SPF/DMARC, Gravatar
+batch     → scan a whole file of domains into one summary table
+diff      → show what changed between two scans of the same target
 ```
 
 ![Terminal demo](docs/demo-domain.svg)
@@ -37,36 +37,36 @@ diff      в†’ show what changed between two scans of the same target
 
 | Module | What it checks |
 |---|---|
-| `dns` | A, AAAA, MX, NS, TXT, CAA, SOA records В· DNSSEC В· single-NS setups |
-| `whois` | Registrar, creation/expiry dates, transfer lock вЂ” RDAP with a raw WHOIS fallback (works for `.ru`/`.СЂС„`) |
-| `subdomains` | Subdomains from Certificate Transparency logs (crt.sh в†’ CertSpotter fallback), resolved and flagged if they look like `admin`/`dev`/`jenkins`вЂ¦ |
-| `email` | SPF (qualifier, 10-lookup limit, `ptr`), DMARC (policy, `pct`, `rua`, subdomain inheritance), DKIM on common selectors, Null MX В· overall **spoofing risk** |
-| `tls` | Trust chain, expiry, self-signed, key size, SHA-1 signatures, SAN list, TLS 1.3 support, legacy TLS 1.0/1.1 acceptance, **Russian national CA (РќРЈР¦ РњРёРЅС†РёС„СЂС‹) and GOST cryptography detection** |
-| `http` | HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy В· version leaks В· cookie flags В· HTTPв†’HTTPS redirect В· `security.txt` В· `robots.txt` |
-| `tech` | Web server, CDN/WAF (Cloudflare, DDoS-Guard, Qrator), CMS (WordPress, Bitrix, Tilda, InSales, MODX, OpenCart, MagentoвЂ¦), frameworks В· outdated jQuery (CVE-2020-11022/11023) |
-| `netinfo` | Hosting ASN, country and network owner (Team Cymru, no key) В· CDN/WAF vs direct-hosting classification В· **origin-IP leak search** вЂ” finds the real server behind a CDN through adjacent DNS records |
-| `shodan` | Open ports and known CVEs from **Shodan InternetDB** вЂ” a keyless, passive lookup of data Shodan already collected (no scanning by us) |
-| `username` command | Whether a nickname is registered on 24 public platforms (GitHub, GitLab, Habr, Pikabu, Telegram, Codeforces, Keybase, Docker Hub, SteamвЂ¦), grouped by category |
-| `phone` command | Country, region, original carrier, line type and time zones вЂ” computed **offline** from Google's libphonenumber data, no network request |
+| `dns` | A, AAAA, MX, NS, TXT, CAA, SOA records · DNSSEC · single-NS setups |
+| `whois` | Registrar, creation/expiry dates, transfer lock — RDAP with a raw WHOIS fallback (works for `.ru`/`.рф`) |
+| `subdomains` | Subdomains from Certificate Transparency logs (crt.sh → CertSpotter fallback), resolved and flagged if they look like `admin`/`dev`/`jenkins`… |
+| `email` | SPF (qualifier, 10-lookup limit, `ptr`), DMARC (policy, `pct`, `rua`, subdomain inheritance), DKIM on common selectors, Null MX · overall **spoofing risk** |
+| `tls` | Trust chain, expiry, self-signed, key size, SHA-1 signatures, SAN list, TLS 1.3 support, legacy TLS 1.0/1.1 acceptance, **Russian national CA (НУЦ Минцифры) and GOST cryptography detection** |
+| `http` | HSTS, CSP, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy · version leaks · cookie flags · HTTP→HTTPS redirect · `security.txt` · `robots.txt` |
+| `tech` | Web server, CDN/WAF (Cloudflare, DDoS-Guard, Qrator), CMS (WordPress, Bitrix, Tilda, InSales, MODX, OpenCart, Magento…), frameworks · outdated jQuery (CVE-2020-11022/11023) |
+| `netinfo` | Hosting ASN, country and network owner (Team Cymru, no key) · CDN/WAF vs direct-hosting classification · **origin-IP leak search** — finds the real server behind a CDN through adjacent DNS records |
+| `shodan` | Open ports and known CVEs from **Shodan InternetDB** — a keyless, passive lookup of data Shodan already collected (no scanning by us) |
+| `username` command | Whether a nickname is registered on 24 public platforms (GitHub, GitLab, Habr, Pikabu, Telegram, Codeforces, Keybase, Docker Hub, Steam…), grouped by category |
+| `phone` command | Country, region, original carrier, line type and time zones — computed **offline** from Google's libphonenumber data, no network request |
 | `email` command | The address's domain: does mail route there (MX), free vs disposable provider, SPF/DMARC presence, public Gravatar. Never sends mail or probes the mailbox |
 
-### рџ‡·рџ‡є Russian TLS support (unique)
+### 🇷🇺 Russian TLS support (unique)
 
 Since 2022 many Russian banks and government sites serve certificates from the **Russian national CA
-(РќРЈР¦ РњРёРЅС†РёС„СЂС‹ / Russian Trusted CA)**, whose root is not in the Mozilla/Microsoft/Apple stores. Generic
-scanners вЂ” SSL Labs, testssl.sh, Hardenize вЂ” report these as a plain **"untrusted certificate"**, which
+(НУЦ Минцифры / Russian Trusted CA)**, whose root is not in the Mozilla/Microsoft/Apple stores. Generic
+scanners — SSL Labs, testssl.sh, Hardenize — report these as a plain **"untrusted certificate"**, which
 is misleading: the certificate is valid, the foreign trust store simply does not carry its root.
 
 ReconLens recognises this case and reports it as an informational **LOW** with the real explanation
 instead of a false **HIGH**. It also detects **GOST cryptography** (GOST R 34.10-2012 keys, GOST R
-34.11-2012 signatures) from the certificate's algorithm OIDs вЂ” relevant to Р¤РЎРўР­Рљ/Р“РћРЎРў compliance and
+34.11-2012 signatures) from the certificate's algorithm OIDs — relevant to ФСТЭК/ГОСТ compliance and
 something Western tooling does not surface at all.
 
 **Reliability details that matter for a security tool:**
 
 - **No false "record missing" findings on bad networks.** Some resolvers (corporate proxies, sandboxes, a few routers) answer only `A` queries. ReconLens probes the system resolver with records that must exist and automatically switches to **DNS-over-HTTPS** if it is filtered. A DNS timeout is reported as an error, never as "no SPF".
 - **Revoked DKIM wildcards** (`*._domainkey TXT "v=DKIM1; p="`) are recognised instead of being counted as keys.
-- **Anti-bot interstitials** (200 OK "Just a momentвЂ¦") are reported as *unknown*, not as "profile found".
+- **Anti-bot interstitials** (200 OK "Just a moment…") are reported as *unknown*, not as "profile found".
 - One failing module never breaks the scan; every module has its own time budget.
 
 ## Report
@@ -105,7 +105,7 @@ reconlens domain example.com                      # all modules, HTML report in 
 reconlens domain example.com -m email,tls         # only selected modules
 reconlens domain example.com --dns doh            # force DNS-over-HTTPS
 reconlens domain example.com --fail-under B       # exit code 3 if grade < B (for CI/CD)
-reconlens batch domains.txt                        # scan many domains в†’ summary table
+reconlens batch domains.txt                        # scan many domains → summary table
 reconlens diff old.json new.json                   # what changed between two scans
 reconlens username torvalds                       # nickname across 24 platforms
 reconlens phone "+7 900 123 45 67"                # offline phone lookup
@@ -122,20 +122,20 @@ Exit codes: `0` success, `1` target not found / scan error, `2` invalid input.
 
 ```mermaid
 flowchart LR
-    CLI[CLI В· typer + rich] --> S[Scanner]
+    CLI[CLI · typer + rich] --> S[Scanner]
     S --> R{DNS resolver<br/>health check}
     R -->|ok| SYS[System DNS]
     R -->|filtered| DOH[DNS-over-HTTPS]
     S --> M1[dns] & M2[whois] & M3[subdomains] & M4[email] & M5[tls] & M6[http] & M7[tech]
     M6 & M7 --> HP[(shared homepage<br/>fetched once)]
     M1 & M2 & M3 & M4 & M5 & M6 & M7 --> F[Findings]
-    F --> SC[Score 0вЂ“100 В· grade AвЂ“F]
+    F --> SC[Score 0–100 · grade A–F]
     SC --> OUT[HTML / JSON report]
 ```
 
-- **Async everywhere** вЂ” modules and their network calls run concurrently (`asyncio`, `httpx`, `dnspython`), a full scan takes a few seconds.
-- **Pure evaluation functions** вЂ” each module separates *collecting* data from *evaluating* it (`evaluate_email`, `analyze_headers`, вЂ¦), so the security logic is unit-tested without the network.
-- **Transparent scoring** вЂ” start at 100, subtract 25/15/7/3/0 per critical/high/medium/low/info finding. It is a triage aid, not a formal risk rating.
+- **Async everywhere** — modules and their network calls run concurrently (`asyncio`, `httpx`, `dnspython`), a full scan takes a few seconds.
+- **Pure evaluation functions** — each module separates *collecting* data from *evaluating* it (`evaluate_email`, `analyze_headers`, …), so the security logic is unit-tested without the network.
+- **Transparent scoring** — start at 100, subtract 25/15/7/3/0 per critical/high/medium/low/info finding. It is a triage aid, not a formal risk rating.
 
 ### Adding a module
 
@@ -174,7 +174,7 @@ ruff format .   # format
 ReconLens relies on public sources: DNS, Certificate Transparency logs, WHOIS/RDAP, the target's
 public web pages and public profile pages, requested the same way a browser does. Phone lookups are
 fully offline. It performs **no port scanning, brute forcing or vulnerability exploitation, and does
-not touch breach dumps, private data or "people-search" databases** вЂ” building a dossier on a private
+not touch breach dumps, private data or "people-search" databases** — building a dossier on a private
 person is out of scope by design.
 
 A `username`/`phone`/`email` "match" only means a public record exists for that string; it never proves
@@ -182,7 +182,7 @@ that one person owns all of them. Use these lookups on your own accounts and foo
 lawfully authorised.
 
 Even so, **only assess domains you own or have written permission to test.** Unauthorised security testing
-may be illegal in your jurisdiction (e.g. Articles 272вЂ“274 of the Criminal Code of the Russian Federation,
+may be illegal in your jurisdiction (e.g. Articles 272–274 of the Criminal Code of the Russian Federation,
 the Computer Fraud and Abuse Act in the US). The author is not responsible for misuse.
 
 Good targets for trying the tool: `example.com`, your own domain, and hosts made for testing such as
