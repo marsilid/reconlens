@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReconLens report — example.com</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --surface: #ffffff; --border: #e3e6eb; --text: #1b1f24; --muted: #5d6673;
+    --accent: #3b5bdb; --code-bg: #f0f2f5;
+    --critical: #b3261e; --high: #d9480f; --medium: #b7791f; --low: #1c7ed6; --info: #6b7280;
+    --grade-a: #2f9e44; --grade-b: #66a80f; --grade-c: #e8a100; --grade-d: #e8590c; --grade-f: #c92a2a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1216; --surface: #171b21; --border: #2a3039; --text: #e6e9ee; --muted: #9aa4b2;
+      --accent: #7c95ff; --code-bg: #20262e;
+      --critical: #ff6b6b; --high: #ff922b; --medium: #fcc419; --low: #4dabf7; --info: #9aa4b2;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.55 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; }
+  header.top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  .brand { font-weight: 700; letter-spacing: .02em; color: var(--accent); }
+  .meta { color: var(--muted); font-size: 13px; }
+  h1 { font-size: 28px; margin: 8px 0 24px; word-break: break-all; }
+  h2 { font-size: 20px; margin: 40px 0 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .summary { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; }
+  .grade {
+    width: 112px; height: 112px; border-radius: 50%; display: grid; place-items: center;
+    border: 8px solid currentColor; font-size: 48px; font-weight: 800;
+  }
+  .grade-A { color: var(--grade-a); } .grade-B { color: var(--grade-b); } .grade-C { color: var(--grade-c); }
+  .grade-D { color: var(--grade-d); } .grade-F { color: var(--grade-f); }
+  .score { font-size: 15px; color: var(--muted); margin-bottom: 12px; }
+  .score strong { color: var(--text); font-size: 22px; }
+  .counts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--border); font-size: 13px; background: var(--surface);
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+  .sev-critical { color: var(--critical); } .sev-high { color: var(--high); } .sev-medium { color: var(--medium); }
+  .sev-low { color: var(--low); } .sev-info { color: var(--info); }
+  .badge {
+    display: inline-block; min-width: 72px; text-align: center; padding: 2px 8px; border-radius: 6px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    background: currentColor;
+  }
+  .badge span { color: var(--bg); }
+  .finding { border-left: 4px solid currentColor; padding: 14px 16px; margin-bottom: 10px; }
+  .finding .head { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .finding h3 { margin: 0; font-size: 15px; color: var(--text); }
+  .finding .module { margin-left: auto; font-size: 12px; color: var(--muted); }
+  .finding p { margin: 8px 0 0; color: var(--text); }
+  .finding .fix { color: var(--muted); }
+  .finding .fix::before { content: "Fix: "; font-weight: 600; color: var(--text); }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  details.module { margin-bottom: 12px; padding: 0; }
+  details.module > summary {
+    cursor: pointer; padding: 14px 20px; display: flex; gap: 12px; align-items: center; list-style: none;
+    font-weight: 600;
+  }
+  details.module > summary::-webkit-details-marker { display: none; }
+  details.module > summary::before { content: "▸"; color: var(--muted); transition: transform .15s; }
+  details.module[open] > summary::before { transform: rotate(90deg); }
+  details.module .body { padding: 0 20px 18px; overflow-x: auto; }
+  .muted { color: var(--muted); font-weight: 400; font-size: 13px; }
+  .error { color: var(--critical); }
+  .note { border-left: 4px solid var(--medium); padding: 12px 16px; margin: -8px 0 20px; color: var(--muted); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  table.kv > tbody > tr > th { width: 200px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+  table.grid th { color: var(--muted); font-weight: 500; }
+  td { word-break: break-word; }
+  ul.plain { margin: 0; padding-left: 18px; }
+  .scroll { max-height: 420px; overflow: auto; }
+  .empty { color: var(--muted); font-style: italic; }
+  footer { margin-top: 48px; color: var(--muted); font-size: 12.5px; border-top: 1px solid var(--border); padding-top: 16px; }
+  @media (max-width: 560px) {
+    .summary { grid-template-columns: 1fr; justify-items: start; }
+    table.kv > tbody > tr > th { width: auto; white-space: normal; }
+  }
+  @media print {
+    body { background: #fff; }
+    details.module { break-inside: avoid; }
+    .scroll { max-height: none; overflow: visible; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <span class="brand">ReconLens</span>
+    <span class="meta">
+      2026-09-28 18:00 UTC · 20.2s ·
+      7 modules · DNS: doh
+    </span>
+  </header>
+  <h1>example.com</h1>
+  <p class="card note">The system DNS resolver returned incomplete answers (it looks filtered), so DNS-over-HTTPS was used instead.</p>
+
+  <section class="card summary">
+    <div class="grade grade-D">D</div>
+    <div>
+      <div class="score"><strong>60</strong> / 100 security posture score</div>
+      <div class="counts">
+        <span class="chip sev-critical"><span class="dot"></span><span style="color:var(--text)">0 critical</span></span>
+        <span class="chip sev-high"><span class="dot"></span><span style="color:var(--text)">0 high</span></span>
+        <span class="chip sev-medium"><span class="dot"></span><span style="color:var(--text)">4 medium</span></span>
+        <span class="chip sev-low"><span class="dot"></span><span style="color:var(--text)">4 low</span></span>
+        <span class="chip sev-info"><span class="dot"></span><span style="color:var(--text)">5 info</span></span>
+      </div>
+    </div>
+  </section>
+
+  <h2>Findings</h2>
+  <article class="card finding sev-medium">
+    <div class="head">
+      <span class="badge"><span>medium</span></span>
+      <h3>Legacy TLS 1.0/1.1 is still accepted</h3>
+      <span class="module">tls</span>
+    </div>
+<p>Old protocol versions are deprecated by RFC 8996 and weaken the connection for clients that can be downgraded.</p><p class="fix">Disable TLS 1.0 and 1.1 on the server.</p>  </article>
+  <article class="card finding sev-medium">
+    <div class="head">
+      <span class="badge"><span>medium</span></span>
+      <h3>Missing Strict-Transport-Security header</h3>
+      <span class="module">http</span>
+    </div>
+<p>Browsers may be downgraded to plain HTTP by an attacker on the network.</p><p class="fix">Strict-Transport-Security: max-age=31536000; includeSubDomains</p>  </article>
+  <article class="card finding sev-medium">
+    <div class="head">
+      <span class="badge"><span>medium</span></span>
+      <h3>Missing Content-Security-Policy header</h3>
+      <span class="module">http</span>
+    </div>
+<p>No second line of defence against XSS and injected third-party scripts.</p><p class="fix">Start with Content-Security-Policy-Report-Only and tighten it iteratively.</p>  </article>
+  <article class="card finding sev-medium">
+    <div class="head">
+      <span class="badge"><span>medium</span></span>
+      <h3>HTTP does not redirect to HTTPS</h3>
+      <span class="module">http</span>
+    </div>
+<p>Visitors who type the bare domain stay on unencrypted HTTP.</p><p class="fix">Return a 301 redirect from http:// to https:// for every path.</p>  </article>
+  <article class="card finding sev-low">
+    <div class="head">
+      <span class="badge"><span>low</span></span>
+      <h3>No CAA record</h3>
+      <span class="module">dns</span>
+    </div>
+<p>Any certificate authority is allowed to issue certificates for this domain, which widens the options for a mis-issued certificate.</p><p class="fix">Publish a CAA record for the CA you use, e.g. <code>0 issue &#34;letsencrypt.org&#34;</code>.</p>  </article>
+  <article class="card finding sev-low">
+    <div class="head">
+      <span class="badge"><span>low</span></span>
+      <h3>Missing X-Frame-Options header</h3>
+      <span class="module">http</span>
+    </div>
+<p>The site can be embedded in a frame on another site (clickjacking).</p><p class="fix">X-Frame-Options: DENY (or CSP frame-ancestors &#39;none&#39;).</p>  </article>
+  <article class="card finding sev-low">
+    <div class="head">
+      <span class="badge"><span>low</span></span>
+      <h3>Missing X-Content-Type-Options header</h3>
+      <span class="module">http</span>
+    </div>
+<p>Browsers may MIME-sniff responses and execute uploaded files as scripts.</p><p class="fix">X-Content-Type-Options: nosniff</p>  </article>
+  <article class="card finding sev-low">
+    <div class="head">
+      <span class="badge"><span>low</span></span>
+      <h3>Missing Referrer-Policy header</h3>
+      <span class="module">http</span>
+    </div>
+<p>Full URLs, including tokens in query strings, may leak to third-party sites.</p><p class="fix">Referrer-Policy: strict-origin-when-cross-origin</p>  </article>
+  <article class="card finding sev-info">
+    <div class="head">
+      <span class="badge"><span>info</span></span>
+      <h3>1 subdomains found in Certificate Transparency logs</h3>
+      <span class="module">subdomains</span>
+    </div>
+<p>1 of the checked names currently resolve to an IP address.</p>  </article>
+  <article class="card finding sev-info">
+    <div class="head">
+      <span class="badge"><span>info</span></span>
+      <h3>Domain declares it accepts no e-mail (Null MX)</h3>
+      <span class="module">email</span>
+    </div>
+<p>An MX of <code>0 .</code> (RFC 7505) tells senders not to deliver mail here. Together with <code>v=spf1 -all</code> and DMARC <code>p=reject</code> this is the correct setup for a domain that does not use e-mail.</p>  </article>
+  <article class="card finding sev-info">
+    <div class="head">
+      <span class="badge"><span>info</span></span>
+      <h3>Missing Permissions-Policy header</h3>
+      <span class="module">http</span>
+    </div>
+<p>Embedded content is not restricted from using camera, microphone, geolocation, etc.</p><p class="fix">Permissions-Policy: camera=(), microphone=(), geolocation=()</p>  </article>
+  <article class="card finding sev-info">
+    <div class="head">
+      <span class="badge"><span>info</span></span>
+      <h3>No security.txt</h3>
+      <span class="module">http</span>
+    </div>
+<p>Researchers have no documented way to report vulnerabilities.</p><p class="fix">Publish /.well-known/security.txt with Contact and Expires (RFC 9116).</p>  </article>
+  <article class="card finding sev-info">
+    <div class="head">
+      <span class="badge"><span>info</span></span>
+      <h3>Site is behind Cloudflare</h3>
+      <span class="module">tech</span>
+    </div>
+<p>A CDN/WAF hides the origin server IP. Origin IPs can still leak through DNS history, subdomains or e-mail headers.</p>  </article>
+
+  <h2>Collected data</h2>
+  <details class="card module">
+    <summary>
+      DNS records
+      <span class="muted">0.4s · 1 findings</span>
+    </summary>
+    <div class="body">
+    <table class="kv"><tbody>
+      <tr><th>Records</th><td>    <table class="kv"><tbody>
+      <tr><th>A</th><td>      <ul class="plain"><li>104.20.23.154
+</li><li>172.66.147.243
+</li></ul>
+</td></tr>
+      <tr><th>AAAA</th><td>      <ul class="plain"><li>2606:4700:10::6814:179a
+</li><li>2606:4700:10::ac42:93f3
+</li></ul>
+</td></tr>
+      <tr><th>MX</th><td>      <ul class="plain"><li>0 .
+</li></ul>
+</td></tr>
+      <tr><th>NS</th><td>      <ul class="plain"><li>elliott.ns.cloudflare.com.
+</li><li>hera.ns.cloudflare.com.
+</li></ul>
+</td></tr>
+      <tr><th>TXT</th><td>      <ul class="plain"><li>_k2n1y4vw3qtb4skdx9e7dxt97qrmmq9
+</li><li>v=spf1 -all
+</li></ul>
+</td></tr>
+      <tr><th>SOA</th><td>      <ul class="plain"><li>elliott.ns.cloudflare.com. dns.cloudflare.com. 2415949263 10000 2400 604800 1800
+</li></ul>
+</td></tr>
+    </tbody></table>
+</td></tr>
+      <tr><th>DNSSEC</th><td>yes
+</td></tr>
+    </tbody></table>
+    </div>
+  </details>
+  <details class="card module">
+    <summary>
+      WHOIS / RDAP
+      <span class="muted">0.6s · 0 findings</span>
+    </summary>
+    <div class="body">
+    <table class="kv"><tbody>
+      <tr><th>Source</th><td>rdap
+</td></tr>
+      <tr><th>Registrar</th><td>RESERVED-Internet Assigned Numbers Authority
+</td></tr>
+      <tr><th>Created</th><td>1995-08-14T04:00:00Z
+</td></tr>
+      <tr><th>Updated</th><td>2026-08-14T08:01:43Z
+</td></tr>
+      <tr><th>Expires</th><td>2027-08-13T04:00:00Z
+</td></tr>
+      <tr><th>Status</th><td>      <ul class="plain"><li>client delete prohibited
+</li><li>client transfer prohibited
+</li><li>client update prohibited
+</li></ul>
+</td></tr>
+      <tr><th>Nameservers</th><td>      <ul class="plain"><li>elliott.ns.cloudflare.com
+</li><li>hera.ns.cloudflare.com
+</li></ul>
+</td></tr>
+      <tr><th>Domain</th><td>example.com
+</td></tr>
+      <tr><th>Days until expiry</th><td>318
+</td></tr>
+      <tr><th>Age days</th><td>11368
+</td></tr>
+    </tbody></table>
+    </div>
+  </details>
+  <details class="card module">
+    <summary>
+      Subdomains (CT logs)
+      <span class="muted">14.9s · 1 findings</span>
+    </summary>
+    <div class="body">
+    <table class="kv"><tbody>
+      <tr><th>Source</th><td>certspotter
+</td></tr>
+      <tr><th>Total</th><td>1
+</td></tr>
+      <tr><th>Resolved</th><td>1
+</td></tr>
+      <tr><th>Resolve limit</th><td><span class="empty">—</span>
+</td></tr>
+      <tr><th>Subdomains</th><td>      <div class="scroll"><table class="grid">
+        <thead><tr><th>Name</th><th>IPS</th></tr></thead>
+        <tbody>
+          <tr><td>www.example.com
+</td><td>      <ul class="plain"><li>172.66.147.243
+</li><li>104.20.23.154
+</li></ul>
+</td></tr>
+        </tbody>
+      </table></div>
+</td></tr>
+    </tbody></table>
+    </div>
+  </details>
+  <details class="card module">
+    <summary>
+      E-mail security
+      <span class="muted">0.6s · 1 findings</span>
+    </summary>
+    <div class="body">
+    <table class="kv"><tbody>
+      <tr><th>MX</th><td>no
+</td></tr>
+      <tr><th>SPF</th><td>    <table class="kv"><tbody>
+      <tr><th>Record</th><td>v=spf1 -all
+</td></tr>
+      <tr><th>All</th><td>-
+</td></tr>
+      <tr><th>Redirect</th><td><span class="empty">—</span>
+</td></tr>
+      <tr><th>DNS lookups</th><td>0
+</td></tr>
+      <tr><th>Uses PTR</th><td>no
+</td></tr>
+    </tbody></table>
+</td></tr>
+      <tr><th>DMARC</th><td>    <table class="kv"><tbody>
+      <tr><th>V</th><td>DMARC1
+</td></tr>
+      <tr><th>P</th><td>reject
+</td></tr>
+      <tr><th>Sp</th><td>reject
+</td></tr>
+      <tr><th>Adkim</th><td>s
+</td></tr>
+      <tr><th>Aspf</th><td>s
+</td></tr>
+    </tbody></table>
+</td></tr>
+      <tr><th>DKIM selectors found</th><td>      <span class="empty">none</span>
+</td></tr>
+      <tr><th>Spoofing risk</th><td>low
+</td></tr>
+      <tr><th>MX records</th><td>      <ul class="plain"><li>0 .
+</li></ul>
+</td></tr>
+      <tr><th>Null MX</th><td>yes
+</td></tr>
+    </tbody></table>
+    </div>
+  </details>
+  <details class="card module">
+    <summary>
+      TLS certificate
+      <span class="muted">4.5s · 1 findings</span>
+    </summary>
+    <div class="body">
+    <table class="kv"><tbody>
+      <tr><th>Port</th><td>443
+</td></tr>
+      <tr><th>Trusted</th><td>yes
+</td></tr>
+      <tr><th>HTTPS</th><td>yes
+</td></tr>
+      <tr><th>Protocol</th><td>TLSv1.3
+</td></tr>
+      <tr><th>Cipher</th><td>TLS_AES_256_GCM_SHA384
+</td></tr>
+      <tr><th>Cipher bits</th><td>256
+</td></tr>
+      <tr><th>Subject</th><td>example.com
+</td></tr>
+      <tr><th>Issuer</th><td>SSL Corporation / Cloudflare TLS Issuing ECC CA 3
+</td></tr>
+      <tr><th>Self signed</th><td>no
+</td></tr>
+      <tr><th>Valid from</th><td>2026-09-26T22:49:11+00:00
+</td></tr>
+      <tr><th>Valid to</th><td>2026-12-25T22:56:35+00:00
+</td></tr>
+      <tr><th>Days left</th><td>88
+</td></tr>
+      <tr><th>Key type</th><td>EC secp256r1
+</td></tr>
+      <tr><th>Key size</th><td>256
+</td></tr>
+      <tr><th>Signature hash</th><td>sha256
+</td></tr>
+      <tr><th>SAN count</th><td>2
+</td></tr>
+      <tr><th>SAN</th><td>      <ul class="plain"><li>example.com
+</li><li>*.example.com
+</li></ul>
+</td></tr>
+      <tr><th>Legacy TLS</th><td>yes
+</td></tr>
+    </tbody></table>
+    </div>
+  </details>
+  <details class="card module">
+    <summary>
+      HTTP security
+      <span class="muted">0.7s · 8 findings</span>
+    </summary>
+    <div class="body">
+    <table class="kv"><tbody>
+      <tr><th>URL</th><td>https://example.com/
+</td></tr>
+      <tr><th>Status</th><td>200
+</td></tr>
+      <tr><th>Server</th><td>cloudflare
+</td></tr>
+      <tr><th>Present</th><td><span class="empty">none</span></td></tr>
+      <tr><th>Missing</th><td>      <ul class="plain"><li>strict-transport-security
+</li><li>content-security-policy
+</li><li>x-frame-options
+</li><li>x-content-type-options
+</li><li>referrer-policy
+</li><li>permissions-policy
+</li></ul>
+</td></tr>
+      <tr><th>Cookies</th><td>      <span class="empty">none</span>
+</td></tr>
+      <tr><th>HTTP redirects to HTTPS</th><td>no
+</td></tr>
+      <tr><th>Security TXT</th><td>no
+</td></tr>
+    </tbody></table>
+    </div>
+  </details>
+  <details class="card module">
+    <summary>
+      Technologies
+      <span class="muted">0.3s · 1 findings</span>
+    </summary>
+    <div class="body">
+    <table class="kv"><tbody>
+      <tr><th>Technologies</th><td>      <div class="scroll"><table class="grid">
+        <thead><tr><th>Name</th><th>Category</th><th>Version</th><th>Evidence</th></tr></thead>
+        <tbody>
+          <tr><td>Cloudflare
+</td><td>CDN / WAF
+</td><td><span class="empty">—</span>
+</td><td>header cf-ray
+</td></tr>
+        </tbody>
+      </table></div>
+</td></tr>
+      <tr><th>Generator</th><td><span class="empty">—</span>
+</td></tr>
+    </tbody></table>
+    </div>
+  </details>
+
+  <footer>
+    Generated by ReconLens v0.1.0. Passive reconnaissance based on public sources
+    (DNS, Certificate Transparency, WHOIS/RDAP, public web pages). The score is a triage aid,
+    not a penetration test. Use only on assets you own or are authorised to assess.
+  </footer>
+</div>
+</body>
+</html>

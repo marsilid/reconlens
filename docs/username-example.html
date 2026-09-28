@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReconLens — username: torvalds</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --surface: #ffffff; --border: #e3e6eb; --text: #1b1f24; --muted: #5d6673;
+    --accent: #3b5bdb; --code-bg: #f0f2f5;
+    --critical: #b3261e; --high: #d9480f; --medium: #b7791f; --low: #1c7ed6; --info: #6b7280;
+    --grade-a: #2f9e44; --grade-b: #66a80f; --grade-c: #e8a100; --grade-d: #e8590c; --grade-f: #c92a2a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1216; --surface: #171b21; --border: #2a3039; --text: #e6e9ee; --muted: #9aa4b2;
+      --accent: #7c95ff; --code-bg: #20262e;
+      --critical: #ff6b6b; --high: #ff922b; --medium: #fcc419; --low: #4dabf7; --info: #9aa4b2;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.55 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; }
+  header.top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  .brand { font-weight: 700; letter-spacing: .02em; color: var(--accent); }
+  .meta { color: var(--muted); font-size: 13px; }
+  h1 { font-size: 28px; margin: 8px 0 24px; word-break: break-all; }
+  h2 { font-size: 20px; margin: 40px 0 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .summary { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; }
+  .grade {
+    width: 112px; height: 112px; border-radius: 50%; display: grid; place-items: center;
+    border: 8px solid currentColor; font-size: 48px; font-weight: 800;
+  }
+  .grade-A { color: var(--grade-a); } .grade-B { color: var(--grade-b); } .grade-C { color: var(--grade-c); }
+  .grade-D { color: var(--grade-d); } .grade-F { color: var(--grade-f); }
+  .score { font-size: 15px; color: var(--muted); margin-bottom: 12px; }
+  .score strong { color: var(--text); font-size: 22px; }
+  .counts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--border); font-size: 13px; background: var(--surface);
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+  .sev-critical { color: var(--critical); } .sev-high { color: var(--high); } .sev-medium { color: var(--medium); }
+  .sev-low { color: var(--low); } .sev-info { color: var(--info); }
+  .badge {
+    display: inline-block; min-width: 72px; text-align: center; padding: 2px 8px; border-radius: 6px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    background: currentColor;
+  }
+  .badge span { color: var(--bg); }
+  .finding { border-left: 4px solid currentColor; padding: 14px 16px; margin-bottom: 10px; }
+  .finding .head { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .finding h3 { margin: 0; font-size: 15px; color: var(--text); }
+  .finding .module { margin-left: auto; font-size: 12px; color: var(--muted); }
+  .finding p { margin: 8px 0 0; color: var(--text); }
+  .finding .fix { color: var(--muted); }
+  .finding .fix::before { content: "Fix: "; font-weight: 600; color: var(--text); }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  details.module { margin-bottom: 12px; padding: 0; }
+  details.module > summary {
+    cursor: pointer; padding: 14px 20px; display: flex; gap: 12px; align-items: center; list-style: none;
+    font-weight: 600;
+  }
+  details.module > summary::-webkit-details-marker { display: none; }
+  details.module > summary::before { content: "▸"; color: var(--muted); transition: transform .15s; }
+  details.module[open] > summary::before { transform: rotate(90deg); }
+  details.module .body { padding: 0 20px 18px; overflow-x: auto; }
+  .muted { color: var(--muted); font-weight: 400; font-size: 13px; }
+  .error { color: var(--critical); }
+  .note { border-left: 4px solid var(--medium); padding: 12px 16px; margin: -8px 0 20px; color: var(--muted); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  table.kv > tbody > tr > th { width: 200px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+  table.grid th { color: var(--muted); font-weight: 500; }
+  td { word-break: break-word; }
+  ul.plain { margin: 0; padding-left: 18px; }
+  .scroll { max-height: 420px; overflow: auto; }
+  .empty { color: var(--muted); font-style: italic; }
+  footer { margin-top: 48px; color: var(--muted); font-size: 12.5px; border-top: 1px solid var(--border); padding-top: 16px; }
+  @media (max-width: 560px) {
+    .summary { grid-template-columns: 1fr; justify-items: start; }
+    table.kv > tbody > tr > th { width: auto; white-space: normal; }
+  }
+  @media print {
+    body { background: #fff; }
+    details.module { break-inside: avoid; }
+    .scroll { max-height: none; overflow: visible; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="brand">ReconLens</span>
+    <span class="meta">2026-09-28 18:33 UTC · username lookup</span>
+  </header>
+  <h1>torvalds</h1>
+  <p class="card note">A &#39;found&#39; result means a public page exists at that URL for this name. It does NOT prove the same person owns every account — names collide across sites.</p>
+
+  <section class="card summary" style="display:block">
+    <div class="score" style="margin:0 0 6px">Found on: <strong style="font-size:16px">13 of 24 sites</strong></div>
+    <div class="score" style="margin:0 0 6px">Platforms checked: <strong style="font-size:16px">24</strong></div>
+  </section>
+
+  <h2>Platforms</h2>
+          <div class="scroll"><table class="grid">
+        <thead><tr><th>Site</th><th>Category</th><th>Status</th><th>Profile</th></tr></thead>
+        <tbody>
+          <tr><td>Codeforces
+</td><td>CP
+</td><td>found
+</td><td>https://codeforces.com/profile/torvalds
+</td></tr>
+          <tr><td>Codewars
+</td><td>CP
+</td><td>found
+</td><td>https://www.codewars.com/users/torvalds
+</td></tr>
+          <tr><td>Habr
+</td><td>Community
+</td><td>found
+</td><td>https://habr.com/ru/users/torvalds/
+</td></tr>
+          <tr><td>Keybase
+</td><td>Community
+</td><td>found
+</td><td>https://keybase.io/torvalds
+</td></tr>
+          <tr><td>Pikabu
+</td><td>Community
+</td><td>found
+</td><td>https://pikabu.ru/@torvalds
+</td></tr>
+          <tr><td>Telegram
+</td><td>Community
+</td><td>found
+</td><td>https://t.me/torvalds
+</td></tr>
+          <tr><td>Codeberg
+</td><td>Dev
+</td><td>found
+</td><td>https://codeberg.org/torvalds
+</td></tr>
+          <tr><td>Docker Hub
+</td><td>Dev
+</td><td>found
+</td><td>https://hub.docker.com/u/torvalds
+</td></tr>
+          <tr><td>GitHub
+</td><td>Dev
+</td><td>found
+</td><td>https://github.com/torvalds
+</td></tr>
+          <tr><td>PyPI
+</td><td>Dev
+</td><td>found
+</td><td>https://pypi.org/user/torvalds/
+</td></tr>
+          <tr><td>Chess.com
+</td><td>Gaming
+</td><td>found
+</td><td>https://www.chess.com/member/torvalds
+</td></tr>
+          <tr><td>Lichess
+</td><td>Gaming
+</td><td>found
+</td><td>https://lichess.org/@/torvalds
+</td></tr>
+          <tr><td>SoundCloud
+</td><td>Media
+</td><td>found
+</td><td>https://soundcloud.com/torvalds
+</td></tr>
+          <tr><td>AtCoder
+</td><td>CP
+</td><td>not found
+</td><td>https://atcoder.jp/users/torvalds
+</td></tr>
+          <tr><td>LeetCode
+</td><td>CP
+</td><td>unknown
+</td><td>https://leetcode.com/torvalds/
+</td></tr>
+          <tr><td>Hacker News
+</td><td>Community
+</td><td>not found
+</td><td>https://news.ycombinator.com/user?id=torvalds
+</td></tr>
+          <tr><td>Last.fm
+</td><td>Community
+</td><td>unknown
+</td><td>https://www.last.fm/user/torvalds
+</td></tr>
+          <tr><td>Reddit
+</td><td>Community
+</td><td>unknown
+</td><td>https://www.reddit.com/user/torvalds
+</td></tr>
+          <tr><td>DEV Community
+</td><td>Dev
+</td><td>not found
+</td><td>https://dev.to/torvalds
+</td></tr>
+          <tr><td>GitLab
+</td><td>Dev
+</td><td>not found
+</td><td>https://gitlab.com/torvalds
+</td></tr>
+          <tr><td>Replit
+</td><td>Dev
+</td><td>not found
+</td><td>https://replit.com/@torvalds
+</td></tr>
+          <tr><td>Steam
+</td><td>Gaming
+</td><td>unknown
+</td><td>https://steamcommunity.com/id/torvalds
+</td></tr>
+          <tr><td>Behance
+</td><td>Media
+</td><td>not found
+</td><td>https://www.behance.net/torvalds
+</td></tr>
+          <tr><td>Gravatar
+</td><td>Media
+</td><td>not found
+</td><td>https://gravatar.com/torvalds
+</td></tr>
+        </tbody>
+      </table></div>
+
+
+  <footer>
+    Generated by ReconLens v0.1.0. Only public profile pages are checked, the same way a browser would open them. Use for a lawful purpose such as auditing your own digital footprint.
+  </footer>
+</div>
+</body>
+</html>

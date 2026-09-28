@@ -1,0 +1,111 @@
+{
+  "kind": "phone",
+  "target": "+79001234567",
+  "generated_at": "2026-09-28T18:32:05.757741+00:00",
+  "summary": {
+    "Valid": "yes",
+    "Country": "RU",
+    "Line type": "mobile",
+    "Region": "Russia",
+    "Carrier (at issue)": "Tele2"
+  },
+  "sections": [
+    {
+      "title": "Number details",
+      "data": {
+        "input": "+7 900 123 45 67",
+        "country_code": "+7",
+        "region_code": "RU",
+        "national_number": "9001234567",
+        "valid": true,
+        "possible": true,
+        "line_type": "mobile",
+        "issued_carrier": "Tele2",
+        "location": "Russia",
+        "time_zones": [
+          "Asia/Almaty",
+          "Asia/Anadyr",
+          "Asia/Aqtobe",
+          "Asia/Irkutsk",
+          "Asia/Kamchatka",
+          "Asia/Krasnoyarsk",
+          "Asia/Magadan",
+          "Asia/Novosibirsk",
+          "Asia/Omsk",
+          "Asia/Sakhalin",
+          "Asia/Vladivostok",
+          "Asia/Yakutsk",
+          "Asia/Yekaterinburg",
+          "Europe/Bucharest",
+          "Europe/Moscow",
+          "Europe/Samara"
+        ]
+      }
+    },
+    {
+      "title": "Formats",
+      "data": {
+        "e164": "+79001234567",
+        "international": "+7 900 123-45-67",
+        "national": "8 (900) 123-45-67",
+        "rfc3966": "tel:+7-900-123-45-67"
+      }
+    },
+    {
+      "title": "Time zones",
+      "rows": [
+        {
+          "time_zone": "Asia/Almaty"
+        },
+        {
+          "time_zone": "Asia/Anadyr"
+        },
+        {
+          "time_zone": "Asia/Aqtobe"
+        },
+        {
+          "time_zone": "Asia/Irkutsk"
+        },
+        {
+          "time_zone": "Asia/Kamchatka"
+        },
+        {
+          "time_zone": "Asia/Krasnoyarsk"
+        },
+        {
+          "time_zone": "Asia/Magadan"
+        },
+        {
+          "time_zone": "Asia/Novosibirsk"
+        },
+        {
+          "time_zone": "Asia/Omsk"
+        },
+        {
+          "time_zone": "Asia/Sakhalin"
+        },
+        {
+          "time_zone": "Asia/Vladivostok"
+        },
+        {
+          "time_zone": "Asia/Yakutsk"
+        },
+        {
+          "time_zone": "Asia/Yekaterinburg"
+        },
+        {
+          "time_zone": "Europe/Bucharest"
+        },
+        {
+          "time_zone": "Europe/Moscow"
+        },
+        {
+          "time_zone": "Europe/Samara"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Carrier reflects the original allocation block. If the number was ported, the current operator may differ."
+  ]
+}

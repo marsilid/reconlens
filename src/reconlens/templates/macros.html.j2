@@ -1,0 +1,30 @@
+{% macro render(value) %}
+  {% if value is mapping %}
+    {% if value %}
+    <table class="kv"><tbody>
+      {% for key, item in value.items() %}
+      <tr><th>{{ key | humanize }}</th><td>{{ render(item) }}</td></tr>
+      {% endfor %}
+    </tbody></table>
+    {% else %}<span class="empty">none</span>{% endif %}
+  {% elif value is iterable and value is not string %}
+    {% if not value %}
+      <span class="empty">none</span>
+    {% elif value[0] is mapping %}
+      <div class="scroll"><table class="grid">
+        <thead><tr>{% for key in value[0].keys() %}<th>{{ key | humanize }}</th>{% endfor %}</tr></thead>
+        <tbody>
+        {% for row in value %}
+          <tr>{% for key in value[0].keys() %}<td>{{ render(row[key]) }}</td>{% endfor %}</tr>
+        {% endfor %}
+        </tbody>
+      </table></div>
+    {% else %}
+      <ul class="plain">{% for item in value %}<li>{{ render(item) }}</li>{% endfor %}</ul>
+    {% endif %}
+  {% elif value is sameas true %}yes
+  {% elif value is sameas false %}no
+  {% elif value is none %}<span class="empty">—</span>
+  {% else %}{{ value }}
+  {% endif %}
+{% endmacro %}

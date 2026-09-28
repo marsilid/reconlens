@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ReconLens — phone: +79001234567</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --surface: #ffffff; --border: #e3e6eb; --text: #1b1f24; --muted: #5d6673;
+    --accent: #3b5bdb; --code-bg: #f0f2f5;
+    --critical: #b3261e; --high: #d9480f; --medium: #b7791f; --low: #1c7ed6; --info: #6b7280;
+    --grade-a: #2f9e44; --grade-b: #66a80f; --grade-c: #e8a100; --grade-d: #e8590c; --grade-f: #c92a2a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1216; --surface: #171b21; --border: #2a3039; --text: #e6e9ee; --muted: #9aa4b2;
+      --accent: #7c95ff; --code-bg: #20262e;
+      --critical: #ff6b6b; --high: #ff922b; --medium: #fcc419; --low: #4dabf7; --info: #9aa4b2;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.55 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 32px 16px 64px; }
+  header.top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+  .brand { font-weight: 700; letter-spacing: .02em; color: var(--accent); }
+  .meta { color: var(--muted); font-size: 13px; }
+  h1 { font-size: 28px; margin: 8px 0 24px; word-break: break-all; }
+  h2 { font-size: 20px; margin: 40px 0 16px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .summary { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; }
+  .grade {
+    width: 112px; height: 112px; border-radius: 50%; display: grid; place-items: center;
+    border: 8px solid currentColor; font-size: 48px; font-weight: 800;
+  }
+  .grade-A { color: var(--grade-a); } .grade-B { color: var(--grade-b); } .grade-C { color: var(--grade-c); }
+  .grade-D { color: var(--grade-d); } .grade-F { color: var(--grade-f); }
+  .score { font-size: 15px; color: var(--muted); margin-bottom: 12px; }
+  .score strong { color: var(--text); font-size: 22px; }
+  .counts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--border); font-size: 13px; background: var(--surface);
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+  .sev-critical { color: var(--critical); } .sev-high { color: var(--high); } .sev-medium { color: var(--medium); }
+  .sev-low { color: var(--low); } .sev-info { color: var(--info); }
+  .badge {
+    display: inline-block; min-width: 72px; text-align: center; padding: 2px 8px; border-radius: 6px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    background: currentColor;
+  }
+  .badge span { color: var(--bg); }
+  .finding { border-left: 4px solid currentColor; padding: 14px 16px; margin-bottom: 10px; }
+  .finding .head { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .finding h3 { margin: 0; font-size: 15px; color: var(--text); }
+  .finding .module { margin-left: auto; font-size: 12px; color: var(--muted); }
+  .finding p { margin: 8px 0 0; color: var(--text); }
+  .finding .fix { color: var(--muted); }
+  .finding .fix::before { content: "Fix: "; font-weight: 600; color: var(--text); }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+  details.module { margin-bottom: 12px; padding: 0; }
+  details.module > summary {
+    cursor: pointer; padding: 14px 20px; display: flex; gap: 12px; align-items: center; list-style: none;
+    font-weight: 600;
+  }
+  details.module > summary::-webkit-details-marker { display: none; }
+  details.module > summary::before { content: "▸"; color: var(--muted); transition: transform .15s; }
+  details.module[open] > summary::before { transform: rotate(90deg); }
+  details.module .body { padding: 0 20px 18px; overflow-x: auto; }
+  .muted { color: var(--muted); font-weight: 400; font-size: 13px; }
+  .error { color: var(--critical); }
+  .note { border-left: 4px solid var(--medium); padding: 12px 16px; margin: -8px 0 20px; color: var(--muted); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  table.kv > tbody > tr > th { width: 200px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+  table.grid th { color: var(--muted); font-weight: 500; }
+  td { word-break: break-word; }
+  ul.plain { margin: 0; padding-left: 18px; }
+  .scroll { max-height: 420px; overflow: auto; }
+  .empty { color: var(--muted); font-style: italic; }
+  footer { margin-top: 48px; color: var(--muted); font-size: 12.5px; border-top: 1px solid var(--border); padding-top: 16px; }
+  @media (max-width: 560px) {
+    .summary { grid-template-columns: 1fr; justify-items: start; }
+    table.kv > tbody > tr > th { width: auto; white-space: normal; }
+  }
+  @media print {
+    body { background: #fff; }
+    details.module { break-inside: avoid; }
+    .scroll { max-height: none; overflow: visible; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="brand">ReconLens</span>
+    <span class="meta">2026-09-28 18:32 UTC · phone lookup</span>
+  </header>
+  <h1>+79001234567</h1>
+  <p class="card note">Carrier reflects the original allocation block. If the number was ported, the current operator may differ.</p>
+
+  <section class="card summary" style="display:block">
+    <div class="score" style="margin:0 0 6px">Valid: <strong style="font-size:16px">yes</strong></div>
+    <div class="score" style="margin:0 0 6px">Country: <strong style="font-size:16px">RU</strong></div>
+    <div class="score" style="margin:0 0 6px">Line type: <strong style="font-size:16px">mobile</strong></div>
+    <div class="score" style="margin:0 0 6px">Region: <strong style="font-size:16px">Russia</strong></div>
+    <div class="score" style="margin:0 0 6px">Carrier (at issue): <strong style="font-size:16px">Tele2</strong></div>
+  </section>
+
+  <h2>Number details</h2>
+    <div class="card">    <table class="kv"><tbody>
+      <tr><th>Input</th><td>+7 900 123 45 67
+</td></tr>
+      <tr><th>Country code</th><td>+7
+</td></tr>
+      <tr><th>Region code</th><td>RU
+</td></tr>
+      <tr><th>National number</th><td>9001234567
+</td></tr>
+      <tr><th>Valid</th><td>yes
+</td></tr>
+      <tr><th>Possible</th><td>yes
+</td></tr>
+      <tr><th>Line type</th><td>mobile
+</td></tr>
+      <tr><th>Issued carrier</th><td>Tele2
+</td></tr>
+      <tr><th>Location</th><td>Russia
+</td></tr>
+      <tr><th>Time zones</th><td>      <ul class="plain"><li>Asia/Almaty
+</li><li>Asia/Anadyr
+</li><li>Asia/Aqtobe
+</li><li>Asia/Irkutsk
+</li><li>Asia/Kamchatka
+</li><li>Asia/Krasnoyarsk
+</li><li>Asia/Magadan
+</li><li>Asia/Novosibirsk
+</li><li>Asia/Omsk
+</li><li>Asia/Sakhalin
+</li><li>Asia/Vladivostok
+</li><li>Asia/Yakutsk
+</li><li>Asia/Yekaterinburg
+</li><li>Europe/Bucharest
+</li><li>Europe/Moscow
+</li><li>Europe/Samara
+</li></ul>
+</td></tr>
+    </tbody></table>
+</div>
+  <h2>Formats</h2>
+    <div class="card">    <table class="kv"><tbody>
+      <tr><th>E164</th><td>+79001234567
+</td></tr>
+      <tr><th>International</th><td>+7 900 123-45-67
+</td></tr>
+      <tr><th>National</th><td>8 (900) 123-45-67
+</td></tr>
+      <tr><th>Rfc3966</th><td>tel:+7-900-123-45-67
+</td></tr>
+    </tbody></table>
+</div>
+  <h2>Time zones</h2>
+          <div class="scroll"><table class="grid">
+        <thead><tr><th>Time zone</th></tr></thead>
+        <tbody>
+          <tr><td>Asia/Almaty
+</td></tr>
+          <tr><td>Asia/Anadyr
+</td></tr>
+          <tr><td>Asia/Aqtobe
+</td></tr>
+          <tr><td>Asia/Irkutsk
+</td></tr>
+          <tr><td>Asia/Kamchatka
+</td></tr>
+          <tr><td>Asia/Krasnoyarsk
+</td></tr>
+          <tr><td>Asia/Magadan
+</td></tr>
+          <tr><td>Asia/Novosibirsk
+</td></tr>
+          <tr><td>Asia/Omsk
+</td></tr>
+          <tr><td>Asia/Sakhalin
+</td></tr>
+          <tr><td>Asia/Vladivostok
+</td></tr>
+          <tr><td>Asia/Yakutsk
+</td></tr>
+          <tr><td>Asia/Yekaterinburg
+</td></tr>
+          <tr><td>Europe/Bucharest
+</td></tr>
+          <tr><td>Europe/Moscow
+</td></tr>
+          <tr><td>Europe/Samara
+</td></tr>
+        </tbody>
+      </table></div>
+
+
+  <footer>
+    Generated by ReconLens v0.1.0. All data is derived offline from the public libphonenumber dataset and describes the number&#39;s allocation only. It does not identify the subscriber. Ported numbers may now belong to a different carrier. Look up numbers only for a lawful purpose.
+  </footer>
+</div>
+</body>
+</html>
