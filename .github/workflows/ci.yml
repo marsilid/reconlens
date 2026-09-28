@@ -8,6 +8,10 @@ on:
 permissions:
   contents: read
 
+env:
+  # Force UTF-8 on Windows runners so Unicode CLI output does not crash.
+  PYTHONUTF8: "1"
+
 jobs:
   test:
     runs-on: ${{ matrix.os }}

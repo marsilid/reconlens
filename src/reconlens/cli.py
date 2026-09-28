@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import re
+import sys
 import webbrowser
 from datetime import datetime
 from enum import Enum
@@ -32,6 +34,12 @@ from reconlens.report import (
 from reconlens.scanner import scan_domain
 from reconlens.usernames import SITES, check_username, username_report, validate_username
 from reconlens.utils import normalize_domain
+
+# The output uses box-drawing, arrows and Cyrillic. A legacy Windows console
+# (cp1251/cp1252) can't encode those and would crash, so force UTF-8 output.
+for _stream in (sys.stdout, sys.stderr):
+    with contextlib.suppress(Exception):
+        _stream.reconfigure(encoding="utf-8")
 
 app = typer.Typer(
     add_completion=False,
